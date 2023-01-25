@@ -65,10 +65,8 @@ public class DriverManager {
         String browser = System.getProperty("browser", "chrome");
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS,true);
-        capabilities.setCapability("selenoid:options", Map.<String, Object>of(
-                "enableVNC", true,
-                "enableVideo", false
-        ));
+        capabilities.setCapability("enableVNC", true);
+        capabilities.setCapability("enableVideo", false);
         capabilities.setBrowserName(browser);
         switch (browser) {
             case "chrome":
