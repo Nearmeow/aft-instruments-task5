@@ -1,5 +1,6 @@
 package com.mariakh.framework.pages;
 
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -18,11 +19,13 @@ public class StartPage extends BasePage {
     @FindBy(xpath = "//a[@data-cga_click_top_menu]")
     private List<WebElement> dropDownMenuList;
 
+    @Step("Закрытие окна Cookies")
     public StartPage closeCookies() {
         wait.until(ExpectedConditions.elementToBeClickable(cookiesCloseButton)).click();
         return this;
     }
 
+    @Step("Клик на базовое меню '{baseMenuName}'")
     public StartPage selectBaseMenu(String baseMenuName) {
         for (WebElement menuItem : baseMenuList) {
             if (menuItem.getText().trim().equalsIgnoreCase(baseMenuName)) {
@@ -34,6 +37,7 @@ public class StartPage extends BasePage {
         return this;
     }
 
+    @Step("Клик на подменю '{nameSubMenu}'")
     public MortgagePage selectSubMenu(String nameSubMenu) {
         for (WebElement menuItem : dropDownMenuList) {
             if (menuItem.getText().equalsIgnoreCase(nameSubMenu)) {
@@ -44,6 +48,4 @@ public class StartPage extends BasePage {
         Assertions.fail("Подменю '" + nameSubMenu + "' не было найдено на стартовой странице!");
         return pageManager.getMortgagePage();
     }
-
-
 }

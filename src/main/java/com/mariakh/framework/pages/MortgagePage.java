@@ -1,6 +1,6 @@
 package com.mariakh.framework.pages;
 
-import com.mariakh.framework.model.ResultInfo;
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -8,8 +8,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -36,21 +37,22 @@ public class MortgagePage extends BasePage {
     @FindBy(xpath = "//div[@data-test-id='main-results-block']")
     private List<WebElement> mainResultBlockList;
 
-    private Duration clickDelay = Duration.ofMillis(300);
+    private Map<String, String> expectedValuesMap = new HashMap<>();
 
-    private ResultInfo expectedInfo;
-
+    @Step("Проверка перехода на ссылке из подменю.")
     public MortgagePage checkOpenMortgagePage() {
         assertEquals("https://www.sberbank.ru/ru/person/credits/home/buying_complete_house"
                 , driverManager.getDriver().getCurrentUrl(), "Текущий url не соответствует ожидаемому.");
         return this;
     }
 
+    @Step("Проверка доступности фрейма и переключение на него.")
     public MortgagePage checkFrameAndSwitch() {
         wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(mortgageIframe));
         return this;
     }
 
+    @Step("Переключение чекбокса 'Страхование жизни и здоровья'.")
     public MortgagePage clickCheckbox() {
         for (WebElement elem : checkBoxList) {
             if (elem.findElement(By.xpath("./span[1]")).getText().equals("Страхование жизни и здоровья")) {
@@ -63,18 +65,39 @@ public class MortgagePage extends BasePage {
         return this;
     }
 
-    public MortgagePage fillHouseCost(String costValue) {
-        fillField(houseCostInput, costValue);
+    @Step("Заполнить поле '{fieldName}' значением - '{fieldValue}'")
+    public MortgagePage fillFrameField(String fieldName, String fieldValue) {
+        switch (fieldName) {
+            case "Стоимость недвижимости":
+                fillField(houseCostInput, fieldValue);
+                break;
+            case "Первоначальный взнос":
+                fillField(initialFeeInput, fieldValue);
+                break;
+            case "Срок кредита":
+                fillField(creditTermInput, fieldValue);
+                break;
+            default:
+                Assertions.fail("Введено неверное имя поля для заполнения");
+        }
         return this;
     }
 
-    public MortgagePage fillInitialFree(String feeValue) {
-        fillField(initialFeeInput, feeValue);
+    @Step("Собрать результирующие значения.")
+    public MortgagePage prepareResultInfo() {
+        WebElement resultBlock = getVisibleResultsBlock();
+        scrollToElementJs(creditTermInput);
+        getAndSaveResultInfo(resultBlock,"Ежемесячный платеж");
+        getAndSaveResultInfo(resultBlock,"Сумма кредита");
+        getAndSaveResultInfo(resultBlock,"Процентная ставка");
+        getAndSaveResultInfo(resultBlock,"Необходимый доход");
         return this;
     }
 
-    public MortgagePage fillCreditTerm(String termValue) {
-        fillField(creditTermInput, termValue);
+    @Step("Проверить значение поля '{fieldName}', ожидаемое значение - '{value}'")
+    public MortgagePage compareExpectedResult(String fieldName, String value) {
+        waitStabilityPage(5000, 250);
+        assertEquals(value, expectedValuesMap.get(fieldName), String.format("Значение поля '%s' не соответствует ожидаемому.", fieldName));
         return this;
     }
 
@@ -83,49 +106,34 @@ public class MortgagePage extends BasePage {
         sendKeysByOneChar(value);
         waitStabilityPage(5000, 250);
         assertEquals(((Integer.parseInt(value) > 999) ? getFormattedString(value) : value)
-                , inputElement.getAttribute("value"));
+                , inputElement.getAttribute("value"), "Значение в поле не соответствует введенному.");
     }
 
-    public ResultInfo prepareResultInfo(WebElement resultBlock) {
-        ResultInfo resultInfo = new ResultInfo();
+    private void getAndSaveResultInfo(WebElement resultBlock, String field) {
 
-        String monthlyPayment = resultBlock.findElement(By
-                .xpath(".//span[contains(text(), 'Ежемесячный платеж')]/..//span[contains(text(), '₽')]")).getText();
-        String creditSum = resultBlock.findElement(By
-                .xpath(".//span[contains(text(), 'Сумма кредита')]/..//span[contains(text(), '₽')]")).getText();
-        String interestRate = resultBlock.findElement(By
-                .xpath(".//span[contains(text(), 'Процентная ставка')]/../div/span[1]/span")).getText();
-        String requiredIncome = resultBlock.findElement(By
-                        .xpath("//div[@class='hint-target-0-9-4']//span[contains(text(), 'Необходимый доход')]/..//span[contains(text(), '₽')]"))
-                .getText();
-
-        resultInfo.setCreditSum(cleanString(creditSum));
-        resultInfo.setMonthlyPayment(cleanString(monthlyPayment));
-        resultInfo.setRequiredIncome(cleanString(requiredIncome));
-        resultInfo.setInterestRate(cleanString(interestRate));
-
-        return resultInfo;
+        String value = "";
+        switch(field) {
+            case "Ежемесячный платеж":
+                value = resultBlock.findElement(By
+                        .xpath(".//span[contains(text(), 'Ежемесячный платеж')]/..//span[contains(text(), '₽')]")).getText();
+                break;
+            case "Сумма кредита":
+                value = resultBlock.findElement(By
+                        .xpath(".//span[contains(text(), 'Сумма кредита')]/..//span[contains(text(), '₽')]")).getText();
+                break;
+            case "Процентная ставка":
+                value = resultBlock.findElement(By
+                        .xpath(".//span[contains(text(), 'Процентная ставка')]/../div/span[1]/span")).getText();
+                break;
+            case "Необходимый доход":
+                value = resultBlock.findElement(By
+                                .xpath("//div[@class='hint-target-0-9-4']//span[contains(text(), 'Необходимый доход')]/..//span[contains(text(), '₽')]"))
+                        .getText();
+        }
+        expectedValuesMap.put(field, cleanString(value));
     }
 
-    public MortgagePage fillExpectedInfo(String monthlyPayment, String creditSum, String interestRate, String requiredIncome) {
-        expectedInfo = new ResultInfo(monthlyPayment, creditSum, interestRate, requiredIncome);
-        return this;
-    }
-    public void compareTotalInfo() {
-        waitStabilityPage(5000, 250);
-        WebElement mainResults = getVisibleResultsBlock();
-        scrollToElementJsTop(mainResults);
-        ResultInfo info = prepareResultInfo(mainResults);
-
-        Assertions.assertAll(
-                () -> assertEquals(expectedInfo.getCreditSum(), info.getCreditSum(), "Сумма кредита не совпадает с ожидаемой."),
-                () -> assertEquals(expectedInfo.getMonthlyPayment(), info.getMonthlyPayment(), "Ежемесячный платёж не совпадает с ожидаемым."),
-                () -> assertEquals(expectedInfo.getRequiredIncome(), info.getRequiredIncome(), "Необходимый доход не совпадает с ожидаемым."),
-                () -> assertEquals(expectedInfo.getInterestRate(), info.getInterestRate(), "Процентная ставка не совпадает с ожидаемой.")
-        );
-    }
-
-    public WebElement getVisibleResultsBlock() {
+    private WebElement getVisibleResultsBlock() {
         for (WebElement element : mainResultBlockList) {
             if (element.isDisplayed()) {
                 return element;

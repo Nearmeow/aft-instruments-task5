@@ -23,25 +23,14 @@ public class BasePage {
     protected JavascriptExecutor js = (JavascriptExecutor) driverManager.getDriver();
 
     protected Actions actions = new Actions(driverManager.getDriver());
-    protected NumberFormat numberFormat = NumberFormat.getInstance();
-    //DecimalFormat decFormat = new DecimalFormat("###,###,###");
+    protected Duration clickDelay = Duration.ofMillis(300);
 
     public BasePage() {
         PageFactory.initElements(driverManager.getDriver(), this);
     }
 
-/*    protected WebElement scrollToElementJs(WebElement element) {
-        js.executeScript("arguments[0].scrollIntoView(true);", element);
-        return element;
-    }*/
-
     protected WebElement scrollToElementJs(WebElement element) {
         js.executeScript("arguments[0].scrollIntoView(false);", element);
-        return element;
-    }
-
-    protected WebElement scrollToElementJsTop(WebElement element) {
-        js.executeScript("arguments[0].scrollIntoView(true);", element);
         return element;
     }
 
