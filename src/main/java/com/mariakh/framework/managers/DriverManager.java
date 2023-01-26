@@ -10,13 +10,14 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Map;
 
 public class DriverManager {
 
     private static DriverManager instance;
 
     private WebDriver driver;
+
+    private TestPropManager propManager = TestPropManager.getInstance();
 
     private DriverManager() {
     }
@@ -71,13 +72,13 @@ public class DriverManager {
         switch (browser) {
             case "chrome":
             case "firefox":
-                capabilities.setVersion("109.0");
+                capabilities.setVersion(propManager.getProperty("remote.chrome.version"));
                 break;
             case "opera":
-                capabilities.setVersion("94.0");
+                capabilities.setVersion(propManager.getProperty("remote.opera.version"));
         }
         try {
-            driver = new RemoteWebDriver(URI.create("http://149.154.71.152:8080/wd/hub").toURL(), capabilities);
+            driver = new RemoteWebDriver(URI.create(propManager.getProperty("selenoid.address")).toURL(), capabilities);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
