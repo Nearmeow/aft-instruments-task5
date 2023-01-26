@@ -13,7 +13,7 @@ node {
     }
     stage('Run Tests') {
         try {
-            sh "${mvn} test -Ddrowser=\"${TAG}\""
+            sh "${mvn} test -Dbrowser=\"${TAG}\""
         }
         catch (Exception e) {
             echo "Test run was broken"
