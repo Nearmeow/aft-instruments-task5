@@ -1,7 +1,7 @@
-def mvn = "/var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven_3.8.7/bin/mvn"
+def mvn = "/var/jenkins_home/tools/hudson.tasks.Maven_MavenInstallation/3.6.3/bin/mvn"
 
 pipeline {
-    agent any
+    agent { label 'linux' }
     parameters {
         string(name: 'BRANCH', defaultValue: 'master', description: '')
         string(name: 'BROWSER', defaultValue: 'chrome', description: 'браузер для запуска тестов')
