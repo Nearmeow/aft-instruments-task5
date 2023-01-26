@@ -3,7 +3,7 @@ def mvn = "/var/jenkins_home/tools/hudson.tasks.Maven_MavenInstallation/3.6.3/bi
 pipeline {
     agent { label 'linux' }
     parameters {
-        string(name: 'TAG', defaultValue: 'chrome', description: 'браузер для запуска')
+        string(name: 'BROWSER', defaultValue: 'chrome', description: 'браузер для запуска тестов')
     }
     stages {
         stage('Build') {
