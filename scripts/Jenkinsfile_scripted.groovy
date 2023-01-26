@@ -4,7 +4,7 @@ node {
     stage('Checkout SCM') {
         checkout(
                 [$class: 'GitSCM',
-                 branches: [[name: "refs/heads/master"]],
+                 branches: [[name: "refs/heads/${BRANCH}"]],
                  userRemoteConfigs: [[url: 'https://github.com/Nearmeow/aft-instruments-task5.git']]]
         )
     }
@@ -13,7 +13,7 @@ node {
     }
     stage('Run Tests') {
         try {
-            sh "${mvn} test -Dbrowser=\"${TAG}\""
+            sh "${mvn} test -Dbrowser=\"${BROWSER}\""
         }
         catch (Exception e) {
             echo "Test run was broken"

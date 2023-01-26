@@ -1,8 +1,9 @@
-def mvn = "/var/jenkins_home/tools/hudson.tasks.Maven_MavenInstallation/3.6.3/bin/mvn"
+def mvn = "/var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven_3.8.7/bin/mvn"
 
 pipeline {
-    agent { label 'linux' }
+    agent any
     parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: '')
         string(name: 'BROWSER', defaultValue: 'chrome', description: 'браузер для запуска тестов')
     }
     stages {
@@ -13,7 +14,7 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh "${mvn} test -Dbrowser=\"${params.TAG}\""
+                sh "${mvn} test -Dbrowser=\"${params.BROWSER}\""
             }
         }
         stage('Allure Report Generation') {
