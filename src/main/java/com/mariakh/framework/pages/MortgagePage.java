@@ -103,7 +103,8 @@ public class MortgagePage extends BasePage {
 
     private void fillField(WebElement inputElement, String value) {
         clickFieldAndClean(inputElement);
-        sendKeysByOneChar(value);
+        //waitStabilityPage(5000, 250);
+        sendKeysByOneChar(inputElement, value);
         waitStabilityPage(5000, 250);
         assertEquals(((Integer.parseInt(value) > 999) ? getFormattedString(value) : value)
                 , inputElement.getAttribute("value"), "Значение в поле не соответствует введенному.");
@@ -145,15 +146,16 @@ public class MortgagePage extends BasePage {
 
     private void clickFieldAndClean(WebElement element) {
         element.click();
-        element.sendKeys(Keys.HOME);
-        element.sendKeys(Keys.chord(Keys.SHIFT, Keys.END));
+        //element.sendKeys(Keys.HOME);
+        //element.sendKeys(Keys.chord(Keys.SHIFT, Keys.END));
+        element.sendKeys(Keys.CONTROL + "a");
         element.sendKeys(Keys.BACK_SPACE);
     }
 
-    private void sendKeysByOneChar(String value) {
+    private void sendKeysByOneChar(WebElement element, String value) {
         String[] valueChars = value.split("");
         for (String valueChar : valueChars) {
-            actions.sendKeys(valueChar).pause(clickDelay).build().perform();
+            actions.moveToElement(element).pause(clickDelay).click(element).sendKeys(valueChar).pause(clickDelay).build().perform();
         }
     }
 }
